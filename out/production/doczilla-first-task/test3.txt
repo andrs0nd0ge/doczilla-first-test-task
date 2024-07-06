@@ -1,0 +1,5 @@
+require 'src/test1.txt'
+
+require 'src/test2.txt'
+
+c

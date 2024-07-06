@@ -1,9 +1,11 @@
+package app;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileNode {
-    private String filePath;
-    private List<String> dependencies = new ArrayList<>();
+    private final String filePath;
+    private final List<String> dependencies = new ArrayList<>();
     private String content = "";
 
     public FileNode(String filePath) {
