@@ -1,10 +1,7 @@
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,7 +14,7 @@ public class Main {
     );
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final String REGEX_PATTERN = "require '([^']+)'"; // match everything inside '' and after the word "require"
+    private final String REGEX_PATTERN = "require '([^']+)'"; // Match everything inside '' and after the word "require"
 
     public static void main(String[] args) throws IOException {
         Main main = new Main();
@@ -25,12 +22,19 @@ public class Main {
     }
 
     private void run() throws IOException {
+        Map<String, FileNode> fileNodes = new HashMap<>(); // Initialise dictionary to store file paths as keys and information (FileNode class) about them as values
         for (String filePath : filePaths) {
-            processFiles(filePath);
+            processFilesAndFillFileNodes(filePath, fileNodes);
+        }
+
+        List<String> sortedFilesList = sortFiles(fileNodes);
+
+        for (String sortedFile : sortedFilesList) {
+            System.out.print(sortedFile);
         }
     }
 
-    private void processFiles(String filePath) throws IOException {
+    private void processFilesAndFillFileNodes(String filePath, Map<String, FileNode> fileNodes) throws IOException {
         List<String> lines = Files.readAllLines(Paths.get(filePath));
         FileNode fileNode = new FileNode(filePath);
 
@@ -43,17 +47,32 @@ public class Main {
             } else {
                 fileNode.addContent(line);
             }
-            System.out.print(fileNode.getContent());
         }
 
-        System.out.println(fileNode.getDependencies());
+        fileNodes.put(filePath, fileNode);
     }
 
-    private void visit(FileNode node,
-                       Set<String> visited,
-                       Set<String> visiting,
-                       List<String> sortedFileContent,
-                       Stack<String> pathStack) {
+    private List<String> sortFiles(Map<String, FileNode> files) {
+        List<String> sortedContent = new ArrayList<>();
+        Set<String> visited = new HashSet<>();
+        Set<String> visiting = new HashSet<>();
+        Stack<String> pathStack = new Stack<>();
+
+        for (FileNode node : files.values()) {
+            if (!visited.contains(node.getFilePath())) {
+                visitFiles(node, files, visited, visiting, sortedContent, pathStack);
+            }
+        }
+
+        return sortedContent;
+    }
+
+    private void visitFiles(FileNode node,
+                            Map<String, FileNode> fileNodes,
+                            Set<String> visited,
+                            Set<String> visiting,
+                            List<String> sortedFileContent,
+                            Stack<String> pathStack) {
         if (visiting.contains(node.getFilePath())) {
             pathStack.push(node.getFilePath());
         }
@@ -64,7 +83,7 @@ public class Main {
 
             for (String dependency : node.getDependencies()) {
                 if (!visited.contains(node.getFilePath())) {
-                    visit(node, visited, visiting, sortedFileContent, pathStack);
+                    visitFiles(fileNodes.get(dependency), fileNodes, visited, visiting, sortedFileContent, pathStack);
                 }
             }
 
