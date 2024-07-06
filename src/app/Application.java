@@ -24,6 +24,13 @@ public class Application {
     private void run() throws IOException {
         List<String> filePaths = config.FILE_PATHS;
 
+        for (String filePath : filePaths) {
+            if (!filePath.endsWith(".txt")) {
+                System.err.println("Each specified file must be of .txt format!");
+                return;
+            }
+        }
+
         try {
             Map<String, FileNode> fileNodes = new HashMap<>(); // Instantiate dictionary to store file paths as keys and information (app.FileNode class) about them as values
 
@@ -35,9 +42,10 @@ public class Application {
             List<String> sortedFilesList = sortFiles(fileNodes); // Get sorted files' content as list
 
             sortedFilesList.forEach(System.out::print); // Print out concatenated list of
+            System.out.println();
 
         } catch (CycleException ex) {
-            System.err.print("There is a dependency cycle within the files: " + ex.getCycleString());
+            System.err.println("There is a dependency cycle within the files: " + ex.getCycleString());
         }
     }
 
