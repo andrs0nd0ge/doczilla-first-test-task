@@ -1,3 +1,5 @@
 a
 
 require 'src/test2.txt'
+
+require 'src/test3.txt'
