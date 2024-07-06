@@ -3,6 +3,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,5 +47,33 @@ public class Main {
         }
 
         System.out.println(fileNode.getDependencies());
+    }
+
+    private void visit(FileNode node,
+                       Set<String> visited,
+                       Set<String> visiting,
+                       List<String> sortedFileContent,
+                       Stack<String> pathStack) {
+        if (visiting.contains(node.getFilePath())) {
+            pathStack.push(node.getFilePath());
+        }
+
+        if (!visited.contains(node.getFilePath())) {
+            visiting.add(node.getFilePath());
+            pathStack.push(node.getFilePath());
+
+            for (String dependency : node.getDependencies()) {
+                if (!visited.contains(node.getFilePath())) {
+                    visit(node, visited, visiting, sortedFileContent, pathStack);
+                }
+            }
+
+            visiting.remove(node.getFilePath());
+            visited.add(node.getFilePath());
+
+            sortedFileContent.add(node.getContent());
+
+            pathStack.pop();
+        }
     }
 }
