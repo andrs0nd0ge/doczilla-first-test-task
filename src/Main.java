@@ -7,14 +7,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Main {
-    @SuppressWarnings("FieldCanBeLocal")
-    private final String REGEX_PATTERN = "require '([^']+)'";
 
-    private final List<String> files = Arrays.asList(
+    private final List<String> filePaths = Arrays.asList(
             "src/test1.txt",
             "src/test2.txt",
             "src/test3.txt"
     );
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final String REGEX_PATTERN = "require '([^']+)'"; // match everything inside '' and after the word "require"
 
     public static void main(String[] args) throws IOException {
         Main main = new Main();
@@ -22,15 +23,27 @@ public class Main {
     }
 
     private void run() throws IOException {
-        String filePath = files.get(0);
-        String txtFile1 = Files.readString(Paths.get(filePath));
-
-        Matcher matcher = Pattern.compile(REGEX_PATTERN).matcher(txtFile1);
-
-        if (matcher.find()) {
-            String requiredTxt = matcher.group(1);
-            String txtFile2 = Files.readString(Paths.get(requiredTxt));
-            System.out.println(txtFile2);
+        for (String filePath : filePaths) {
+            processFiles(filePath);
         }
+    }
+
+    private void processFiles(String filePath) throws IOException {
+        List<String> lines = Files.readAllLines(Paths.get(filePath));
+        FileNode fileNode = new FileNode(filePath);
+
+        for (String line : lines) {
+            Matcher matcher = Pattern.compile(REGEX_PATTERN).matcher(line);
+
+            if (matcher.find()) {
+                String dependency = matcher.group(1);
+                fileNode.addDependency(dependency);
+            } else {
+                fileNode.addContent(line);
+            }
+            System.out.print(fileNode.getContent());
+        }
+
+        System.out.println(fileNode.getDependencies());
     }
 }
