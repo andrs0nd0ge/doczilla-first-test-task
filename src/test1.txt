@@ -1,1 +1,3 @@
 a
+
+require 'src/test2.txt'

@@ -1,16 +1,27 @@
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main {
+    @SuppressWarnings("FieldCanBeLocal")
+    private final String REGEX_PATTERN = "require '([^']+)'";
     public static void main(String[] args) throws IOException {
-        Path path1 = Paths.get("src/test1.txt");
-        Path path2 = Paths.get("src/test2.txt");
+        Main main = new Main();
+        main.run();
+    }
 
-        String fileStr1 = Files.readString(path1);
-        String fileStr2 = Files.readString(path2);
+    private void run() throws IOException {
+        String filePath = "src/test1.txt";
+        String txtFile1 = Files.readString(Paths.get(filePath));
 
-        System.out.println(fileStr1 + fileStr2);
+        Matcher matcher = Pattern.compile(REGEX_PATTERN).matcher(txtFile1);
+
+        if (matcher.find()) {
+            String requiredTxt = matcher.group(1);
+            String txtFile2 = Files.readString(Paths.get(requiredTxt));
+            System.out.println(txtFile2);
+        }
     }
 }
